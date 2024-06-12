@@ -49,6 +49,9 @@ jobs:
           submodules: recursive
       - uses: ./.github/actions/untracked
       - uses: ./.github/actions/setup-python
+      - name: Test Commit
+        run: |
+          echo "test"
       - name: Install dependencies
         run: |
           source ./dev/install-common-deps.sh --skinny
