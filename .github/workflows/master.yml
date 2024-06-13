@@ -58,6 +58,11 @@ jobs:
       - name: Run tests
         run: |
           ./dev/run-python-skinny-tests.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverages
+          path: artifacts/*
 
   python:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
