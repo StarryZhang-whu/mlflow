@@ -14,8 +14,7 @@ trap 'err=1' ERR
 export MLFLOW_SKINNY='true'
 python -m pip install coverage
 
-coverage run --source=mlflow -m pytest tests/test_skinny_client_omits_sql_libs.py
-coverage json -o artifacts/coverage1.json
+COVERAGE_FILE=artifacts/.coverage_1 coverage run --source=mlflow -m pytest tests/test_skinny_client_omits_sql_libs.py
 
 # After verifying skinny client does not include store specific requirements,
 # we are installing sqlalchemy store requirements as our example store for the test suite.
@@ -25,10 +24,9 @@ python -m pip install sqlalchemy alembic
 # Given the example store does not delete dependencies, we verify non store related dependencies
 # after the example store setup. This verifies both the example store and skinny client do not add
 # unintended libraries.
-coverage run --source=mlflow -m pytest tests/test_skinny_client_omits_data_science_libs.py
-coverage json -o artifacts/coverage2.json
+COVERAGE_FILE=artifacts/.coverage_2 coverage run --source=mlflow -m pytest tests/test_skinny_client_omits_data_science_libs.py
 
-coverage run --source=mlflow -m pytest \
+COVERAGE_FILE=artifacts/.coverage_3 coverage run --source=mlflow -m pytest \
   tests/test_runs.py \
   tests/tracking/test_client.py \
   tests/tracking/test_tracking.py \
@@ -39,10 +37,8 @@ coverage run --source=mlflow -m pytest \
   tests/utils/test_requirements_utils.py::test_infer_requirements_excludes_mlflow \
   tests/utils/test_search_utils.py \
   tests/store/tracking/test_file_store.py
-coverage json -o artifacts/coverage3.json
 
 python -m pip install pandas
-coverage run --source=mlflow -m pytest tests/test_skinny_client_autolog_without_scipy.py
-coverage json -o artifacts/coverage4.json
+COVERAGE_FILE=artifacts/.coverage_4 coverage run --source=mlflow -m pytest tests/test_skinny_client_autolog_without_scipy.py
 
 test $err = 0

@@ -274,11 +274,11 @@ jobs:
       - uses: ./.github/actions/pipdeptree
       - name: Run tests
         run: |
-          coverage run --source=mlflow -m pytest pytest tests/evaluate --ignore=tests/evaluate/test_default_evaluator_delta.py
+          coverage run --source=mlflow -m pytest tests/evaluate --ignore=tests/evaluate/test_default_evaluator_delta.py
           coverage json -o artifacts/coverage8.json
       - name: Run tests with delta
         run: |
-          coverage run --source=mlflow -m pytest pytest tests/evaluate/test_default_evaluator_delta.py
+          coverage run --source=mlflow -m pytest tests/evaluate/test_default_evaluator_delta.py
           coverage json -o artifacts/coverage9.json
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
