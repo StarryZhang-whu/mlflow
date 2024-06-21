@@ -34,6 +34,7 @@ from sklearn.metrics import (
 
 import mlflow
 from mlflow import MlflowClient
+from mlflow.data.evaluation_dataset import EvaluationDataset, _gen_md5_for_arraylike_obj
 from mlflow.data.pandas_dataset import from_pandas
 from mlflow.entities import Trace, TraceData
 from mlflow.exceptions import MlflowException
@@ -45,8 +46,6 @@ from mlflow.models.evaluation import (
 )
 from mlflow.models.evaluation.artifacts import ImageEvaluationArtifact
 from mlflow.models.evaluation.base import (
-    EvaluationDataset,
-    _gen_md5_for_arraylike_obj,
     _is_model_deployment_endpoint_uri,
     _start_run_or_reuse_active_run,
 )
@@ -60,6 +59,7 @@ from mlflow.models.evaluation.default_evaluator import DefaultEvaluator
 from mlflow.models.evaluation.evaluator_registry import _model_evaluation_registry
 from mlflow.pyfunc import _ServedPyFuncModel
 from mlflow.pyfunc.scoring_server.client import ScoringServerClient
+from mlflow.tracing.constant import TraceMetadataKey
 from mlflow.tracing.fluent import TRACE_BUFFER
 from mlflow.tracking.artifact_utils import get_artifact_uri
 from mlflow.utils import insecure_hash
@@ -393,7 +393,7 @@ def test_mlflow_evaluate_logs_traces():
             model, eval_data, targets="ground_truth", extra_metrics=[mlflow.metrics.exact_match()]
         )
     assert len(get_traces()) == 1
-    assert run.info.run_id == get_traces()[0].info.request_metadata["mlflow.sourceRun"]
+    assert run.info.run_id == get_traces()[0].info.request_metadata[TraceMetadataKey.SOURCE_RUN]
 
 
 def test_pyfunc_evaluate_logs_traces():
@@ -423,7 +423,7 @@ def test_pyfunc_evaluate_logs_traces():
         )
     assert len(get_traces()) == 1
     assert len(get_traces()[0].data.spans) == 2
-    assert run.info.run_id == get_traces()[0].info.request_metadata["mlflow.sourceRun"]
+    assert run.info.run_id == get_traces()[0].info.request_metadata[TraceMetadataKey.SOURCE_RUN]
 
 
 def test_langchain_evaluate_autologs_traces():
@@ -464,7 +464,7 @@ def test_langchain_evaluate_autologs_traces():
     assert len(get_traces()) == 2
     for trace in get_traces():
         assert len(trace.data.spans) == 3
-    assert run.info.run_id == get_traces()[0].info.request_metadata["mlflow.sourceRun"]
+    assert run.info.run_id == get_traces()[0].info.request_metadata[TraceMetadataKey.SOURCE_RUN]
 
     TRACE_BUFFER.clear()
 
@@ -507,7 +507,7 @@ def test_langchain_pyfunc_autologs_traces():
         )
     assert len(get_traces()) == 1
     assert len(get_traces()[0].data.spans) == 3
-    assert run.info.run_id == get_traces()[0].info.request_metadata["mlflow.sourceRun"]
+    assert run.info.run_id == get_traces()[0].info.request_metadata[TraceMetadataKey.SOURCE_RUN]
 
 
 def test_langchain_evaluate_fails_with_an_exception():
@@ -2133,3 +2133,9 @@ def test_evaluate_on_model_endpoint_invalid_input_data(input_data, error_message
                 targets="ground_truth",
                 inference_params={"max_tokens": 10, "temperature": 0.5},
             )
+
+
+def test_import_evaluation_dataset():
+    # This test is to validate both imports work at the same time
+    from mlflow.models.evaluation import EvaluationDataset
+    from mlflow.models.evaluation.base import EvaluationDataset  # noqa: F401
